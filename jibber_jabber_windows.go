@@ -127,15 +127,23 @@ func DetectPreferredUILanguage() (language string, err error) {
 	bufferSize := 0
 	// get buffer size
 	_, _, dllError := proc.Call(muiLanguageName, uintptr(unsafe.Pointer(&numLanguages)), uintptr(unsafe.Pointer(&buffer[0])), uintptr(unsafe.Pointer(&bufferSize)))
-	if bufferSize == 0 {
-		err = errors.New(COULD_NOT_DETECT_PACKAGE_ERROR_MESSAGE + ":\n" + dllError.Error())
+	if bufferSize == 0 || dllError != nil {
+		errStr := ""
+		if dllError != nil {
+			errStr = dllError.Error()
+		}
+		err = errors.New(COULD_NOT_DETECT_PACKAGE_ERROR_MESSAGE + ":\n" + errStr)
 		return
 	}
 	// allocate buffer
 	buffer = make([]uint16, bufferSize)
 	r, _, dllError := proc.Call(muiLanguageName, uintptr(unsafe.Pointer(&numLanguages)), uintptr(unsafe.Pointer(&buffer[0])), uintptr(unsafe.Pointer(&bufferSize)))
-	if r == 0 {
-		err = errors.New(COULD_NOT_DETECT_PACKAGE_ERROR_MESSAGE + ":\n" + dllError.Error())
+	if r == 0 || dllError != nil {
+		errStr := ""
+		if dllError != nil {
+			errStr = dllError.Error()
+		}
+		err = errors.New(COULD_NOT_DETECT_PACKAGE_ERROR_MESSAGE + ":\n" + errStr)
 		return
 	}
 	// get first preferred language-territory
