@@ -55,3 +55,9 @@ func DetectTerritory() (territory string, err error) {
 
 	return
 }
+
+// DetectPreferredUILanguage func
+func DetectPreferredUILanguage() (language string, err error) {
+	language, err = DetectLanguage()
+	return
+}

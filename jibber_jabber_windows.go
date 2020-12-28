@@ -112,3 +112,46 @@ func DetectTerritory() (territory string, err error) {
 
 	return
 }
+
+// DetectPreferredUILanguage func
+func DetectPreferredUILanguage() (language string, err error) {
+	sysCallName := "GetUserPreferredUILanguages"
+	// MUI_LANGUAGE_NAME
+	var muiLanguageName uintptr = 8
+	// 1 - don't know buffer size
+	var buffer []uint16 = make([]uint16, 1)
+
+	dll := syscall.MustLoadDLL("kernel32")
+	proc := dll.MustFindProc(sysCallName)
+	numLanguages := 0
+	bufferSize := 0
+	// get buffer size
+	_, _, dllError := proc.Call(muiLanguageName, uintptr(unsafe.Pointer(&numLanguages)), uintptr(unsafe.Pointer(&buffer[0])), uintptr(unsafe.Pointer(&bufferSize)))
+	if bufferSize == 0 || dllError != nil {
+		errStr := ""
+		if dllError != nil {
+			errStr = dllError.Error()
+		}
+		err = errors.New(COULD_NOT_DETECT_PACKAGE_ERROR_MESSAGE + ":\n" + errStr)
+		return
+	}
+	// allocate buffer
+	buffer = make([]uint16, bufferSize)
+	r, _, dllError := proc.Call(muiLanguageName, uintptr(unsafe.Pointer(&numLanguages)), uintptr(unsafe.Pointer(&buffer[0])), uintptr(unsafe.Pointer(&bufferSize)))
+	if r == 0 || dllError != nil {
+		errStr := ""
+		if dllError != nil {
+			errStr = dllError.Error()
+		}
+		err = errors.New(COULD_NOT_DETECT_PACKAGE_ERROR_MESSAGE + ":\n" + errStr)
+		return
+	}
+	// get first preferred language-territory
+	locale := syscall.UTF16ToString(buffer)
+	if len(locale) == 0 {
+		language, err = DetectLanguage()
+	}
+	language, _ = splitLocale(locale)
+
+	return
+}
