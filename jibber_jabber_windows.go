@@ -127,7 +127,7 @@ func DetectPreferredUILanguage() (language string, err error) {
 	bufferSize := 0
 	// get buffer size
 	_, _, dllError := proc.Call(muiLanguageName, uintptr(unsafe.Pointer(&numLanguages)), uintptr(unsafe.Pointer(&buffer[0])), uintptr(unsafe.Pointer(&bufferSize)))
-	if bufferSize == 0 || dllError != nil {
+	if bufferSize == 0 {
 		errStr := ""
 		if dllError != nil {
 			errStr = dllError.Error()
@@ -138,7 +138,7 @@ func DetectPreferredUILanguage() (language string, err error) {
 	// allocate buffer
 	buffer = make([]uint16, bufferSize)
 	r, _, dllError := proc.Call(muiLanguageName, uintptr(unsafe.Pointer(&numLanguages)), uintptr(unsafe.Pointer(&buffer[0])), uintptr(unsafe.Pointer(&bufferSize)))
-	if r == 0 || dllError != nil {
+	if r == 0 {
 		errStr := ""
 		if dllError != nil {
 			errStr = dllError.Error()
